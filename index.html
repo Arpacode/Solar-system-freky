@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> 2d freaking solar system☠️🌍🔴</title>
+  <style>
+    html, body {
+      margin: 0;
+      background: radial-gradient(#000, #02010f);
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .ui {
+      position: absolute;
+      top: 500px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 10px 15px;
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+    }
+
+    .ui label {
+      font-size: 14px;
+    }
+
+    .credit {
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      color: #aaa;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<canvas id="space"></canvas>
+
+<div class="ui">
+  <label>🕒 Time Travel: </label>
+  <input type="range" min="-10" max="10" value="1" step="0.1" id="timeControl" />
+  <div>🌍 Earth Years: <span id="earthY">0.00</span></div>
+  <div>🔴 Mars Years: <span id="marsY">0.00</span></div>
+</div>
+
+<div class="credit">✨ Made by Arpan ☠️🦋</div>
+
+<script>
+  const canvas = document.getElementById('space');
+  const ctx = canvas.getContext('2d');
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+
+  const center = { x: canvas.width / 2, y: canvas.height / 2 };
+  let time = 0;
+  let speed = 1;
+
+  // UI
+  const slider = document.getElementById("timeControl");
+  slider.oninput = () => speed = parseFloat(slider.value);
+
+  // Orbits
+  const planets = [
+    {
+      name: "Earth",
+      radius: 100,
+      color: "#0077ff",
+      size: 6,
+      period: 10, // seconds per orbit
+      trail: [],
+      elem: document.getElementById("earthY")
+    },
+    {
+      name: "Mars",
+      radius: 160,
+      color: "#ff3b3b",
+      size: 5,
+      period: 18,
+      trail: [],
+      elem: document.getElementById("marsY")
+    }
+  ];
+
+  function drawSun() {
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, 20, 0, Math.PI * 2);
+    ctx.fillStyle = "yellow";
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = "orange";
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  function drawPlanet(p, angle) {
+    const x = center.x + p.radius * Math.cos(angle);
+    const y = center.y + p.radius * Math.sin(angle);
+
+    // Trail
+    p.trail.push({ x, y });
+    if (p.trail.length > 100) p.trail.shift();
+
+    // Trail draw
+    ctx.beginPath();
+    for (let i = 0; i < p.trail.length - 1; i++) {
+      const pt1 = p.trail[i];
+      const pt2 = p.trail[i + 1];
+      ctx.moveTo(pt1.x, pt1.y);
+      ctx.lineTo(pt2.x, pt2.y);
+    }
+    ctx.strokeStyle = p.color + "66";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Planet
+    ctx.beginPath();
+    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    // Update year
+    p.elem.textContent = (time / p.period).toFixed(2);
+  }
+
+  function draw() {
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawSun();
+
+    planets.forEach(p => {
+      const angle = (2 * Math.PI * time) / p.period;
+      drawPlanet(p, angle);
+    });
+
+    time += 0.01 * speed;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>
+</body>
+</html>
